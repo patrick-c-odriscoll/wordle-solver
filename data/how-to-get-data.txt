@@ -1,0 +1,13 @@
+curl -s https://raw.githubusercontent.com/tabatkins/wordle-list/main/words > wordle-word-list.txt
+
+Remove after NYT removal of offensive words:
+chink
+wench
+whore
+bitch
+sluts
+fibre
+lynch
+pussy
+agora
+pupal
