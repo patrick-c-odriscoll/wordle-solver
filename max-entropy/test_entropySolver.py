@@ -1,5 +1,12 @@
 import entropySolver
-import numpy as np
+
+__author__ = "Patrick C O\'Driscoll"
+__copyright__ = "2022"
+__credits__ = ["Patrick C O\'Driscoll"]
+__license__ = "MIT"
+__version__ = "0.0.1"
+__maintainer__ = "Patrick C O\'Driscoll"
+__email__ = "patrick.c.odriscoll@gmail.com"
 
 def test_c2ind():
   assert entropySolver.c2ind('a') == 0
@@ -15,10 +22,3 @@ def test_entropyElement():
 def test_find():
   assert entropySolver.find('aaaabb','a') == [0,1,2,3]
   assert entropySolver.find('bbaaaa','a') == [2,3,4,5]
-
-def test_getScore():
-  assert entropySolver.getScore('speed','dares') == '10021'
-  assert entropySolver.getScore('speed','creep') == '01220'
-  assert entropySolver.getScore('neens','creep') == '01200'
-  assert entropySolver.getScore('sneed','creep') == '00220'
-  assert entropySolver.getScore('parks','reaps') == '11102'
