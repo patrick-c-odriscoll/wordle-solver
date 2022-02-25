@@ -45,6 +45,7 @@ def entropyElement(p):
   '''
   return -p*np.log2(p) if ( (p > 0) and (p < 1) ) else 0
 
+
 class cLogic():
   def __init__(self):
     '''
@@ -228,29 +229,40 @@ class entropySolver():
       ii += 1
     return
   
+  def updateEntropy(self):
+    '''
+      Update entropy members
+    '''
+    self.conditional()
+    self.differentialEntropy()
+    return
+  
   def nextGuess(self):
     '''
       Main loop to determine the optimal next guess
       output: guess - word
     '''
-    self.conditional()
-    self.differentialEntropy()
     self.guessIndex = np.argmax(self.entropy)
     if self.entropy[self.guessIndex] > 0:
       return self.words[self.guessIndex]
     else:
       return self.mask.reduceWords(self.words)[0]
 
+
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(description='Wordle Solver via Maximum Entropy Information Theory Approach')
-  parser.add_argument('--hard',   action='store_true', help='solve in hard more')
-  parser.add_argument('--debug',  action='store_true', help='print debug information')
-  parser.add_argument('--play',   action='store_true', help='use as a wordle aid')
+  parser.add_argument('--hard',         action='store_true', help='solve in hard more')
+  parser.add_argument('--debug',        action='store_true', help='print debug information')
+  parser.add_argument('--performance',  action='store_true', help='check performance on all words playing wordle')
+  parser.add_argument('--wordle',       action='store_true', help='interactive wordle solver')
+  parser.add_argument('--quordle',      action='store_true', help='interactive quordle solver')
   args = parser.parse_args()
 
   allWords = wordle.getAllWords()
 
-  if not args.play:
+  assert np.sum([args.wordle,args.performance,args.quordle]) == 1, 'must use only one of these flags: performance, wordle, quordle'
+
+  if args.performance:
     guesses = np.zeros(len(allWords))
     jj = 0
     for secret in allWords:
@@ -284,12 +296,14 @@ if __name__ == "__main__":
     plt.hist(guesses,bins=int(np.max(guesses)-np.min(guesses)))
     plt.show()
   
-  else:
+  if args.wordle:
     score = '00000'
     solver = entropySolver(allWords)
-    while score != '22222':
+    count = 0
+    while score != '22222' and count < 6:
+      solver.updateEntropy()
       guess = solver.nextGuess()
-      print('Best guess:\t'+guess)
+      print('Best guess:\t'+str(count)+'\t'+guess)
       score = str(input('Please give score: 0-grey, 1-yellow, 2-green\n'))
       assert len(score)==5
       for ii in score:
@@ -297,5 +311,46 @@ if __name__ == "__main__":
       solver.mask.applyScore(score,guess)
       if args.hard:
         solver.mask.reduceWords()
-    print('Congradulations: You won!')
+      count+=1
+    if count < 6:
+      print('Congradulations: You won!')
+    else:
+      print('Better luck next time.')
   
+  if args.quordle:
+    score = np.array(['00000','00000','00000','00000','00000'])
+    solver = np.array([entropySolver(allWords),entropySolver(allWords),
+                       entropySolver(allWords),entropySolver(allWords)])
+    solved = np.ones(4,dtype=bool)
+    count = 0
+    while np.sum(solved) > 0 and count < 9:
+      # update entropy
+      [jj.updateEntropy() for jj in solver]
+      allEntropy = np.array([jj.entropy for jj in solver])
+      # check if we have solved one of the problems
+      solution = False
+      for jj in range(allEntropy.shape[0]): # bug here!
+        if solved[jj]:
+          if np.sum(allEntropy[jj,:]) == 0:
+            guess = solver[jj].nextGuess()
+            print('\tSolution for a puzzel ',jj,' is:',guess)
+            solved[jj] = False
+            solution = True
+            break
+      # find the next guess
+      if not solution:
+        maxIndex = np.argmax(np.sum(allEntropy,axis=0))
+        guess = solver[np.argmax(solved)].words[maxIndex]
+        print('Best guess:\t' + str(count+1) + '\t' + guess)
+      # get the feedback
+      for jj in range(allEntropy.shape[0]):
+        if solved[jj]:
+            score[jj] = str(input('Score'+str(jj)+': 0-grey, 1-yellow, 2-green\n'))
+            assert len(score)==5
+            solver[jj].mask.applyScore(score[jj],guess)
+      count += 1
+    if count < 9:
+      print('Congradulations: You won!')
+    else:
+      print('Better luck next time.')
+    

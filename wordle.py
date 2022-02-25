@@ -54,3 +54,18 @@ def getAllWords():
     words[ii] = words[ii].strip()
   file.close()
   return words
+
+def getAnswerWords():
+  '''
+    Grab the data stored for all valid 5 letter words
+      input:
+        None
+      output:
+        list of all valid 5 letter words
+  '''
+  file = open(str(os.path.dirname(os.path.realpath(__file__)))+'\data\wordle-answer-list.txt','r')
+  words = np.array(file.readlines())
+  for ii in range(len(words)):
+    words[ii] = words[ii].strip()
+  file.close()
+  return words
