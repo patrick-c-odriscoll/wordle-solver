@@ -14,3 +14,6 @@ std 0.8652248944184272
 Win Rate: 0.9861914680243771
 
 Best first word: 'tores'
+
+Histogram of performance of all possible words is below:
+![All-Words-Wordle-Histogram](https://user-images.githubusercontent.com/39496990/155858026-7af6610c-34cd-4a23-97b1-f40f6b010131.png)
